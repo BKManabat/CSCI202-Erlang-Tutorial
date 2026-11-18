@@ -141,64 +141,132 @@ end</code></pre>
             <h3>Example 2: Creating a Custom Macro</h3>
 
             <p>
-                Developers can also define their own
-                macros. The following example creates
-                a custom conditional construct called
-                my_unless.
+                Developers can create their own macros to
+                express common programming patterns more
+                clearly. For example, suppose we frequently
+                need to check whether a temperature exceeds
+                30 degrees.
             </p>
 
-            <pre><code>defmodule MyMacros do
-    defmacro my_unless(condition, do: block) do
+            <h4>Ordinary Conditional Expression</h4>
+
+            <pre><code>temperature = 35
+
+if temperature &gt; 30 do
+    IO.puts("Turn on fan")
+end</code></pre>
+
+            <p>Output:</p>
+
+            <pre><code>Turn on fan</code></pre>
+
+            <p>
+                We can create a custom macro called
+                <code>when_hot</code> to express the
+                same condition using a reusable construct.
+            </p>
+
+            <h4>Defining the when_hot Macro</h4>
+
+            <pre><code>defmodule TemperatureMacros do
+    defmacro when_hot(temperature, do: block) do
         quote do
-            if not unquote(condition) do
+            if unquote(temperature) &gt; 30 do
                 unquote(block)
             end
         end
     end
 end
 
-require MyMacros
+require TemperatureMacros
 
-temperature = 25
+temperature = 35
 
-MyMacros.my_unless temperature &gt; 30 do
-    IO.puts("Not too hot")
+TemperatureMacros.when_hot temperature do
+    IO.puts("Turn on fan")
 end</code></pre>
 
             <p>Output:</p>
 
-            <pre><code>Not too hot</code></pre>
+            <pre><code>Turn on fan</code></pre>
 
             <h3>How Does the Macro Work?</h3>
 
             <ol>
                 <li>
-                    <code>defmacro</code> defines
-                    a custom macro.
+                    <code>defmacro</code> defines the
+                    custom <code>when_hot</code> macro.
                 </li>
                 <li>
-                    <code>quote</code> constructs
-                    the code to be generated.
+                    <code>quote</code> constructs an
+                    abstract syntax tree (AST)
+                    representing the generated code.
                 </li>
                 <li>
-                    <code>unquote</code> inserts the
-                    supplied expressions into
-                    the generated code.
+                    <code>unquote(temperature)</code>
+                    inserts the supplied temperature
+                    expression into the generated code.
+                </li>
+                <li>
+                    <code>unquote(block)</code> inserts
+                    the code inside the macro's
+                    <code>do</code> block.
                 </li>
                 <li>
                     During compilation, the macro
-                    expands into a conditional
+                    expands into an ordinary conditional
                     expression.
                 </li>
             </ol>
 
             <p>
                 <strong>Key Takeaway:</strong>
-                Elixir's macro system allows developers
-                to define reusable language constructs
-                without changing the compiler.
-                Fundamental special forms such as
-                case cannot be overridden.
+                Elixir macros allow developers to create
+                reusable, language-like constructs by
+                generating code during compilation.
+                This can improve expressiveness and
+                readability without modifying the
+                compiler.
+            </p>
+  
+            <h3>Interactive Macro Expansion</h3>
+
+            <p>
+                Follow the steps below to see how
+                Elixir expands the custom
+                <code>when_hot</code> macro into
+                an ordinary conditional expression.
+            </p>
+
+            <div class="matching-demo">
+
+                <h3>How when_hot Expands</h3>
+
+                <p id="macro-progress"></p>
+
+                <h4 id="macro-title"></h4>
+
+                <pre><code id="macro-code"></code></pre>
+
+                <p id="macro-explanation"
+                   aria-live="polite"></p>
+
+                <button type="button" id="macro-prev">
+                    Previous
+                </button>
+
+                <button type="button" id="macro-next">
+                    Next Step
+                </button>
+
+            </div>
+
+            <p>
+                <strong>Remember:</strong>
+                Macros transform code during compilation.
+                They do not introduce a new BEAM runtime
+                or change how Erlang processes are
+                scheduled.
             </p>
 
             <!-- EXTENSIBILITY -->

@@ -126,6 +126,16 @@
                 is matched against a right-hand value.
             </p>
 
+            
+            <p>
+                <strong>Learning Goal:</strong>
+                Compare the same two-variable situation in
+                both languages. In Prolog, variables on either
+                side can be bound through unification. In Erlang,
+                the expression on the right must be evaluated
+                before the pattern on the left is matched.
+            </p>
+
             <div class="matching-demo">
 
                 <h3>Step-by-Step Matching</h3>
@@ -147,6 +157,51 @@
                 <button id="matching-next">Next Step</button>
 
             </div>
+
+            <h3>Why the Erlang Expression Fails</h3>
+
+            <p>
+                In <code>{X, 25} = {john, Y}</code>,
+                the variable <code>Y</code> is unbound
+                on the right-hand side.
+                Erlang cannot evaluate that tuple, so
+                it raises an unbound-variable error
+                before matching the left-hand pattern.
+                In this example, <code>X</code>
+                remains unbound.
+            </p>
+
+            <p>
+                A successful Erlang example is
+                <code>{X, 25} = {john, 25}</code>,
+                which binds <code>X</code> to
+                <code>john</code>.
+                Unlike Prolog, Erlang does not use
+                two-way unification.
+            </p>
+
+            <h3>Check Your Understanding</h3>
+
+            <p>
+                In Erlang, can
+                <code>{X, 25} = {john, Y}</code>
+                automatically bind the unbound
+                variable <code>Y</code> to
+                <code>25</code>?
+            </p>
+
+            <button type="button" id="matching-quiz-yes">
+                Yes
+            </button>
+
+            <button type="button" id="matching-quiz-no">
+                No
+            </button>
+
+            <p id="matching-quiz-feedback"
+               role="status"
+               aria-live="polite">
+            </p>
 
             <h2>Backtracking vs. Function Clause Evaluation</h2>
 

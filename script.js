@@ -20,20 +20,20 @@ const matchingSteps = {
 
     erlang: [
         ["Initial Expression",
-         "{X, 25} = {john, 25}.",
-         "Erlang evaluates the right-hand value."],
+         "{X, 25} = {john, Y}.",
+         "X and Y are initially unbound. Erlang first evaluates the right-hand expression."],
 
-        ["First Element",
-         "X = john",
-         "The pattern binds X to john."],
+        ["Evaluate Right-Hand Tuple",
+         "{john, Y}",
+         "Erlang needs the value of Y to construct the right-hand tuple."],
 
-        ["Second Element",
-         "25 = 25",
-         "The literals match."],
+        ["Unbound Variable",
+         "Y is unbound",
+         "Because Y has no value, evaluating the right-hand expression fails before pattern matching."],
 
-        ["Success",
-         "X = john",
-         "The expression succeeds."]
+        ["Result: Error",
+         "Unbound-variable error; X remains unbound",
+         "Unlike Prolog, Erlang does not bind variables on the right to make both sides match."]
     ]
 };
 
@@ -369,4 +369,159 @@ if (supervisionSystem) {
     });
 
     changeSystem();
+}
+
+// ==========================================
+// Prolog vs. Erlang - Comprehension Check
+// ==========================================
+
+const quizFeedback =
+    document.getElementById("matching-quiz-feedback");
+
+if (quizFeedback) {
+    const yes =
+        document.getElementById("matching-quiz-yes");
+
+    const no =
+        document.getElementById("matching-quiz-no");
+
+    yes.addEventListener("click", () => {
+        quizFeedback.textContent =
+            "Not quite. Erlang evaluates the " +
+            "right-hand tuple first. Because Y " +
+            "is unbound, matching never begins.";
+    });
+
+    no.addEventListener("click", () => {
+        quizFeedback.textContent =
+            "Correct! Erlang cannot evaluate " +
+            "{john, Y} while Y is unbound. " +
+            "Prolog can bind variables on both sides.";
+    });
+}
+
+// ==========================================
+// Elixir - Interactive Macro Expansion
+// ==========================================
+
+const macroSteps = [
+    {
+        title: "Step 1: Call the Macro",
+        code: `temperature = 35
+
+TemperatureMacros.when_hot temperature do
+    IO.puts("Turn on fan")
+end`,
+        explanation:
+            "The programmer calls the custom when_hot " +
+            "macro instead of writing the full " +
+            "conditional expression."
+    },
+
+    {
+        title: "Step 2: Macro Definition",
+        code: `defmacro when_hot(temperature, do: block) do
+    quote do
+        if unquote(temperature) > 30 do
+            unquote(block)
+        end
+    end
+end`,
+        explanation:
+            "Elixir processes the macro during " +
+            "compilation. The quote block constructs " +
+            "an abstract syntax tree (AST), and " +
+            "unquote inserts the supplied expressions."
+    },
+
+    {
+        title: "Step 3: Expanded Code",
+        code: `if temperature > 30 do
+    IO.puts("Turn on fan")
+end`,
+        explanation:
+            "Conceptually, the macro expands into " +
+            "this ordinary conditional expression. " +
+            "The macro call is replaced by generated code."
+    },
+
+    {
+        title: "Step 4: Execute the Condition",
+        code: `temperature = 35
+
+35 > 30
+# true`,
+        explanation:
+            "At runtime, the generated conditional " +
+            "expression evaluates the temperature " +
+            "and determines whether the block executes."
+    },
+
+    {
+        title: "Step 5: Program Output",
+        code: `Turn on fan`,
+        explanation:
+            "Because 35 is greater than 30, " +
+            "the program prints Turn on fan. " +
+            "The developer-defined macro makes " +
+            "the original source code more expressive."
+    }
+];
+
+const macroTitle =
+    document.getElementById("macro-title");
+
+if (macroTitle) {
+    const macroCode =
+        document.getElementById("macro-code");
+
+    const macroExplanation =
+        document.getElementById("macro-explanation");
+
+    const macroProgress =
+        document.getElementById("macro-progress");
+
+    const macroPrev =
+        document.getElementById("macro-prev");
+
+    const macroNext =
+        document.getElementById("macro-next");
+
+    let macroStep = 0;
+
+    function renderMacroStep() {
+        const current = macroSteps[macroStep];
+
+        macroTitle.textContent = current.title;
+        macroCode.textContent = current.code;
+        macroExplanation.textContent =
+            current.explanation;
+
+        macroProgress.textContent =
+            `Step ${macroStep + 1} of ${macroSteps.length}`;
+
+        macroPrev.disabled = macroStep === 0;
+
+        macroNext.textContent =
+            macroStep === macroSteps.length - 1
+                ? "Restart"
+                : "Next Step";
+    }
+
+    macroPrev.addEventListener("click", () => {
+        if (macroStep > 0) {
+            macroStep--;
+        }
+
+        renderMacroStep();
+    });
+
+    macroNext.addEventListener("click", () => {
+        macroStep =
+            (macroStep + 1) % macroSteps.length;
+
+        renderMacroStep();
+    });
+
+    renderMacroStep();
 }
