@@ -370,3 +370,33 @@ if (supervisionSystem) {
 
     changeSystem();
 }
+
+// ==========================================
+// Prolog vs. Erlang - Comprehension Check
+// ==========================================
+
+const quizFeedback =
+    document.getElementById("matching-quiz-feedback");
+
+if (quizFeedback) {
+    const yes =
+        document.getElementById("matching-quiz-yes");
+
+    const no =
+        document.getElementById("matching-quiz-no");
+
+    yes.addEventListener("click", () => {
+        quizFeedback.textContent =
+            "Not quite. Erlang evaluates the " +
+            "right-hand tuple first. Because Y " +
+            "is unbound, matching never begins.";
+    });
+
+    no.addEventListener("click", () => {
+        quizFeedback.textContent =
+            "Correct! Erlang cannot evaluate " +
+            "{john, Y} while Y is unbound. " +
+            "Prolog can bind variables on both sides.";
+    });
+}
+
