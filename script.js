@@ -400,3 +400,128 @@ if (quizFeedback) {
     });
 }
 
+// ==========================================
+// Elixir - Interactive Macro Expansion
+// ==========================================
+
+const macroSteps = [
+    {
+        title: "Step 1: Call the Macro",
+        code: `temperature = 35
+
+TemperatureMacros.when_hot temperature do
+    IO.puts("Turn on fan")
+end`,
+        explanation:
+            "The programmer calls the custom when_hot " +
+            "macro instead of writing the full " +
+            "conditional expression."
+    },
+
+    {
+        title: "Step 2: Macro Definition",
+        code: `defmacro when_hot(temperature, do: block) do
+    quote do
+        if unquote(temperature) > 30 do
+            unquote(block)
+        end
+    end
+end`,
+        explanation:
+            "Elixir processes the macro during " +
+            "compilation. The quote block constructs " +
+            "an abstract syntax tree (AST), and " +
+            "unquote inserts the supplied expressions."
+    },
+
+    {
+        title: "Step 3: Expanded Code",
+        code: `if temperature > 30 do
+    IO.puts("Turn on fan")
+end`,
+        explanation:
+            "Conceptually, the macro expands into " +
+            "this ordinary conditional expression. " +
+            "The macro call is replaced by generated code."
+    },
+
+    {
+        title: "Step 4: Execute the Condition",
+        code: `temperature = 35
+
+35 > 30
+# true`,
+        explanation:
+            "At runtime, the generated conditional " +
+            "expression evaluates the temperature " +
+            "and determines whether the block executes."
+    },
+
+    {
+        title: "Step 5: Program Output",
+        code: `Turn on fan`,
+        explanation:
+            "Because 35 is greater than 30, " +
+            "the program prints Turn on fan. " +
+            "The developer-defined macro makes " +
+            "the original source code more expressive."
+    }
+];
+
+const macroTitle =
+    document.getElementById("macro-title");
+
+if (macroTitle) {
+    const macroCode =
+        document.getElementById("macro-code");
+
+    const macroExplanation =
+        document.getElementById("macro-explanation");
+
+    const macroProgress =
+        document.getElementById("macro-progress");
+
+    const macroPrev =
+        document.getElementById("macro-prev");
+
+    const macroNext =
+        document.getElementById("macro-next");
+
+    let macroStep = 0;
+
+    function renderMacroStep() {
+        const current = macroSteps[macroStep];
+
+        macroTitle.textContent = current.title;
+        macroCode.textContent = current.code;
+        macroExplanation.textContent =
+            current.explanation;
+
+        macroProgress.textContent =
+            `Step ${macroStep + 1} of ${macroSteps.length}`;
+
+        macroPrev.disabled = macroStep === 0;
+
+        macroNext.textContent =
+            macroStep === macroSteps.length - 1
+                ? "Restart"
+                : "Next Step";
+    }
+
+    macroPrev.addEventListener("click", () => {
+        if (macroStep > 0) {
+            macroStep--;
+        }
+
+        renderMacroStep();
+    });
+
+    macroNext.addEventListener("click", () => {
+        macroStep =
+            (macroStep + 1) % macroSteps.length;
+
+        renderMacroStep();
+    });
+
+    renderMacroStep();
+}
