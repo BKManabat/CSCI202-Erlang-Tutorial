@@ -20,20 +20,20 @@ const matchingSteps = {
 
     erlang: [
         ["Initial Expression",
-         "{X, 25} = {john, 25}.",
-         "Erlang evaluates the right-hand value."],
+         "{X, 25} = {john, Y}.",
+         "X and Y are initially unbound. Erlang first evaluates the right-hand expression."],
 
-        ["First Element",
-         "X = john",
-         "The pattern binds X to john."],
+        ["Evaluate Right-Hand Tuple",
+         "{john, Y}",
+         "Erlang needs the value of Y to construct the right-hand tuple."],
 
-        ["Second Element",
-         "25 = 25",
-         "The literals match."],
+        ["Unbound Variable",
+         "Y is unbound",
+         "Because Y has no value, evaluating the right-hand expression fails before pattern matching."],
 
-        ["Success",
-         "X = john",
-         "The expression succeeds."]
+        ["Result: Error",
+         "Unbound-variable error; X remains unbound",
+         "Unlike Prolog, Erlang does not bind variables on the right to make both sides match."]
     ]
 };
 
