@@ -1,1 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction - CSCI 202</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header><h1>Introduction</h1><p>CSCI 202 - Erlang Tutorial</p></header>
+<main><a href="../index.html">Back to Home</a>
+<section>
+<h2>Keep separate tasks in separate processes</h2>
+<p>A service may handle many requests while some parts fail. Erlang lets us divide the work among lightweight processes. Each process keeps its own state and communicates by sending messages. OTP supplies server and supervisor behaviors for organizing those processes [1, 2].</p>
+<p>For example, two counter processes can maintain separate totals. Updating one does not update the other. A supervisor can restart a failed counter, but the application must decide where its previous total is stored and how to recover it.</p>
+<h2>Language, runtime, and libraries</h2>
+<ul><li><strong>Erlang</strong> supplies functions, immutable values, pattern matching, and message-passing expressions.</li>
+<li><strong>BEAM</strong> is the virtual machine that executes Erlang code and schedules its processes.</li>
+<li><strong>OTP</strong> supplies libraries and design principles, including standard servers and supervision trees.</li></ul>
+<p>Erlang began at Ericsson for telecommunications systems. Its design emphasizes concurrent activities and recovery from process failures. Joe Armstrong's thesis explains how those requirements shaped the language and system architecture [1].</p>
+<h2>Work through a small service</h2>
+<p>Start with <a href="erlang-basics.html">Erlang Basics</a>. Compile a counter, send it requests, and follow the state and mailbox changes. Then compare Erlang with <a href="comparative-analysis.html">Prolog, Elixir, Akka/Scala, and Pony</a>.</p>
+<h2>References</h2>
+<p>[1] Joe Armstrong (2003), <a href="https://erlang.org/download/armstrong_thesis_2003.pdf">Making Reliable Distributed Systems in the Presence of Software Errors</a>.</p>
+<p>[2] Erlang/OTP, <a href="https://www.erlang.org/doc/system/design_principles.html">OTP Design Principles</a>.</p>
+</section>
+</main>
 
+</body>
+</html>

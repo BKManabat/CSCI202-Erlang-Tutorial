@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erlang Basics - CSCI 202</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header><h1>Erlang Basics</h1><p>CSCI 202 - Erlang Tutorial</p></header>
+<main><a href="../index.html">Back to Home</a>
+<section>
+<h2>Match a value before choosing a clause</h2>
+<p><code>{add, 3}</code> is a tuple. The atom <code>add</code> names an operation and the integer <code>3</code> supplies its amount. In <code>{add, Amount} = {add, 3}</code>, pattern matching binds the unbound variable <code>Amount</code> to <code>3</code>. Variables begin with an uppercase letter or underscore. Unquoted atoms begin with a lowercase letter [1].</p>
+<p>Variables cannot be reassigned. After that match, <code>Amount = 4</code> fails because the bound value is still 3. Functions use multiple clauses and guards to choose behavior. The first clause whose pattern and guard succeed is evaluated [1].</p>
+<h2>Run a counter process</h2>
+<p>Install Erlang/OTP and run <code>erl</code> from a terminal. Save the following module as <code>counter_demo.erl</code> in the directory where you start the shell. The module name and filename must match.</p>
+<pre><code>-module(counter_demo).
+-export([start/0, add/2, stop/1]).
 
+start() -&gt;
+    spawn(fun() -&gt; loop(0) end).
+
+add(Pid, Amount) -&gt;
+    Ref = make_ref(),
+    Pid ! {add, self(), Ref, Amount},
+    receive
+        {Ref, Value} -&gt; Value
+    after 1000 -&gt;
+        timeout
+    end.
+
+stop(Pid) -&gt;
+    Pid ! stop.
+
+loop(N) -&gt;
+    receive
+        {add, From, Ref, Amount} when is_integer(Amount) -&gt;
+            Next = N + Amount,
+            From ! {Ref, Next},
+            loop(Next);
+        stop -&gt;
+            ok
+    end.
+</code></pre>
+<p><code>spawn</code> starts the counter and returns its process identifier, or PID. <code>Pid ! Message</code> sends a message. Sending does not wait for the receiver to handle it. A <code>receive</code> expression takes a matching message from the mailbox [2].</p>
+<pre><code>1&gt; c(counter_demo).
+{ok,counter_demo}
+2&gt; Pid = counter_demo:start(), counter_demo:add(Pid, 3).
+3
+3&gt; counter_demo:add(Pid, 4).
+7
+4&gt; counter_demo:stop(Pid).
+stop</code></pre>
+<p>The two additions return 3 and 7. The value <code>stop</code> is returned by the send expression. It does not acknowledge that the process has already terminated.</p>
+<h2>Follow a request through the mailbox</h2>
+<p>This walkthrough illustrates one request at a time. It runs in the browser and does not execute Erlang. The module above is the executable example.</p>
+<div class="interactive-box" id="counter-trace">
+<label for="counter-scenario">Scenario</label>
+<select id="counter-scenario"><option value="normal">Add 3, then add 4</option><option value="unmatched">An unmatched message arrives first</option><option value="timeout">The caller times out before the update</option></select>
+<p id="counter-progress"></p><h3 id="counter-title"></h3>
+<pre id="counter-state"></pre><p id="counter-explanation" aria-live="polite"></p>
+<button type="button" id="counter-prev">Previous</button>
+<button type="button" id="counter-next">Next Step</button>
+<button type="button" id="counter-reset">Reset</button>
+</div>
+<h2>Carry state through recursion</h2>
+<p>The first update computes <code>Next = 0 + 3</code>, replies with 3, and calls <code>loop(3)</code>. The next update runs with <code>N = 3</code>. No existing variable is reassigned. The recursive call is the last operation, so the loop does not accumulate pending returns [3].</p>
+<p><code>self()</code> supplies the caller's PID. <code>make_ref()</code> creates a reference that lets the caller recognize this request's reply. It does not detect duplicate updates.</p>
+<h2>Account for messages that do not match</h2>
+<p>The counter leaves <code>hello</code> in its mailbox because neither receive clause matches it. A later valid request can still be handled. Repeated unmatched messages retain memory and can make mailbox searches longer [2, 3]. An addition with a noninteger amount also fails the guard and remains queued.</p>
+<p>The one-second timeout bounds the caller's wait. It does not cancel the request. An update may happen after the timeout, and retrying can apply the addition twice. A late reply can remain in the caller's mailbox.</p>
+<h2>Put recovery rules outside the worker</h2>
+<p>OTP's <code>gen_server</code> behavior standardizes the request loop. An application supplies callbacks such as <code>init/1</code>, <code>handle_call/3</code>, and <code>handle_cast/2</code>. A counter callback can return <code>{reply, Next, Next}</code>: one value for the reply and another for the next state [4].</p>
+<p>A supervisor starts and monitors child processes. Assuming permanent children, <code>one_for_one</code> restarts the failed child, <code>one_for_all</code> restarts the group, and <code>rest_for_one</code> restarts the failed child and those started after it. Restart intensity limits repeated restarts within a configured time window [5].</p>
+<p>Our <code>spawn</code> call does not attach the counter to a supervisor. If a replacement counter starts at zero, it does not recover the previous total. Persistent state, retry handling, and overload behavior still need application rules. The <a href="akka-scala.html">Akka/Scala comparison</a> includes a supervision walkthrough.</p>
+<h2>Separate concurrency from throughput</h2>
+<p>This counter handles one update at a time. More clients can increase its mailbox without increasing that process's update rate. Independent counters can be split across processes. Message data is generally copied, with exceptions for reference-counted binaries and literals on the same node [3].</p>
+<h2>References</h2>
+<p>[1] Erlang/OTP, <a href="https://www.erlang.org/doc/system/patterns.html">Pattern Matching</a> and <a href="https://www.erlang.org/doc/system/ref_man_functions.html">Functions</a>.</p>
+<p>[2] Erlang/OTP, <a href="https://www.erlang.org/doc/system/conc_prog.html">Concurrent Programming</a>.</p>
+<p>[3] Erlang/OTP, <a href="https://www.erlang.org/doc/system/eff_guide_processes.html">Processes: Efficiency Guide</a>.</p>
+<p>[4] Erlang/OTP, <a href="https://www.erlang.org/doc/system/gen_server_concepts.html">gen_server Behaviour</a>.</p>
+<p>[5] Erlang/OTP, <a href="https://www.erlang.org/doc/system/sup_princ.html">Supervisor Behaviour</a>.</p>
+</section>
+</main>
+<script src="../counter-trace.js"></script>
+</body>
+</html>
