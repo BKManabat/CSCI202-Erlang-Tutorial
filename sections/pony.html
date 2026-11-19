@@ -250,6 +250,88 @@
                 requires copying all underlying data.
             </p>
 
+            <h3>Code Example: Erlang vs. Pony</h3>
+
+            <p>
+                The following examples demonstrate
+                how Erlang and Pony exchange data
+                between independent processes or actors.
+            </p>
+
+            <h4>Erlang: Process Isolation</h4>
+
+            <pre><code>Original = [10, 20, 30],
+
+Receiver = spawn(fun() -&gt;
+    receive
+        {data, List} -&gt;
+            NewList = [40 | List],
+            io:format("Receiver: ~p~n", [NewList])
+    end
+end),
+
+Receiver ! {data, Original},
+io:format("Sender: ~p~n", [Original]).</code></pre>
+
+            <p>Output (order may vary):</p>
+
+            <pre><code>Sender: [10,20,30]
+Receiver: [40,10,20,30]</code></pre>
+
+            <p>
+                The sender retains its original list,
+                while the receiving process constructs
+                a new list. Erlang's immutable values
+                and process isolation prevent the
+                receiver from modifying the sender's
+                original data.
+            </p>
+
+            <h4>Pony: Ownership Transfer with iso</h4>
+
+            <pre><code>actor Receiver
+    be accept(data: Array[U8] iso) =&gt;
+        // Receiver receives isolated data.
+        None
+
+actor Main
+    new create(env: Env) =&gt;
+        let receiver = Receiver
+
+        let data: Array[U8] iso =
+            recover iso Array[U8] end
+
+        receiver.accept(consume data)
+
+        // Sender cannot reuse data here.</code></pre>
+
+            <p>
+                The <code>iso</code> capability provides
+                isolated access to mutable data.
+                The <code>consume</code> expression
+                relinquishes the sender's reference,
+                allowing the receiving actor to obtain
+                ownership safely.
+            </p>
+
+            <p>
+                Unlike Erlang's ordinary message passing,
+                Pony can transfer ownership without
+                necessarily copying the underlying object.
+                The compiler checks that conflicting
+                mutable access is not permitted.
+            </p>
+
+            <p>
+                <strong>Key Difference:</strong>
+                Erlang prevents shared mutable state
+                through immutable data and process
+                isolation. Pony enforces safe access
+                through reference capabilities such
+                as <code>iso</code> and
+                <code>val</code>.
+            </p>
+
             <h3>Comparing Data Transfer</h3>
 
             <table border="1" cellpadding="10">
@@ -511,9 +593,6 @@
         renderPony();
     })();
     </script>
-</body>
-</html>
-
 
     <script src="../script.js"></script>
 </body>
