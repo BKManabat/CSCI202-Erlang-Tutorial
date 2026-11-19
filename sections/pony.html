@@ -242,6 +242,19 @@
             </p>
 
             <p>
+                Pony is designed for performance-sensitive,
+                low-latency concurrent applications.
+                Its native compilation, reference capabilities,
+                and actor-oriented garbage collection help
+                reduce certain runtime costs. In particular,
+                safe ownership transfer can avoid copying
+                mutable objects between actors, while its
+                garbage collector avoids global
+                stop-the-world collection pauses.
+                Actual latency still depends on the workload.
+            </p>
+
+            <p>
                 Erlang also has sharing optimizations:
                 reference-counted binaries and certain
                 literal data can be shared between
