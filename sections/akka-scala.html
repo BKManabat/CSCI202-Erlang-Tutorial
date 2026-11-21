@@ -240,6 +240,57 @@ system ! "hello"</code></pre>
                 unhandled exceptions.
             </p>
 
+            <h3>Example: Akka Typed vs. Classic</h3>
+
+            <p>
+                Consider an actor processing messages
+                when an unexpected exception occurs.
+                The result depends on which Akka actor
+                API is used and whether a supervision
+                strategy has been configured.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Situation</th>
+                        <th>Akka Typed</th>
+                        <th>Akka Classic</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Unexpected exception</td>
+                        <td>Stop by default</td>
+                        <td>Generally restart</td>
+                    </tr>
+                    <tr>
+                        <td>Explicit supervision</td>
+                        <td>Configurable</td>
+                        <td>Configurable</td>
+                    </tr>
+                    <tr>
+                        <td>Restart behavior</td>
+                        <td>
+                            Recreates behavior state
+                            when configured to restart
+                        </td>
+                        <td>
+                            Restarts the actor using
+                            its supervision directive
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>
+                <strong>Important:</strong>
+                Typed and Classic are two actor APIs
+                within Akka, not two separate
+                fault-tolerance systems. Both support
+                configurable supervision.
+            </p>
+
             <h2>4. Interactive Supervision Demonstration</h2>
 
             <p>
@@ -302,10 +353,19 @@ system ! "hello"</code></pre>
 
             <p>
                 For Erlang, the simulation assumes
-                three restartable child processes
-                started in the order A, B, C.
-                For Akka, it assumes child B has
-                the selected supervision strategy.
+                three permanent child processes,
+                started in the order A, B, C,
+                with restart limits not exceeded.
+                Actual restart behavior also depends
+                on each child's restart specification.
+            </p>
+
+            <p>
+                For Akka Typed, the simulation assumes
+                that Actor B encounters an exception
+                and uses the selected failure-handling
+                strategy. The other actors are shown
+                as unaffected for this example.
             </p>
 
             <h2>5. Summary: Erlang vs. Akka/Scala</h2>
